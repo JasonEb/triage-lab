@@ -49,6 +49,6 @@ fixtures/          vulnerable sample app for the optional PR agent
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm triage lint-logs <file.jsonl> [--json] [--min-percent=<n>]`
-- `pnpm sim --scenario=<n> --style=structured|legacy`
+- `pnpm sim --scenario=<n|all> [--style=structured|legacy] [--seed=<n>] [--out=<dir>]` (writes to `logs/`, git-ignored; `--list` shows scenarios)
 - `pnpm triage ask "<question>"`
 - `pnpm evals`
