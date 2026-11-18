@@ -36,6 +36,12 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12(@types/node@20.19.43)(vite@8.3.8(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.15))
 
+  apps/cli:
+    dependencies:
+      '@triage/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+
   packages/logger:
     dependencies:
       zod:

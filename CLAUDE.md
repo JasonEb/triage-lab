@@ -47,6 +47,8 @@ fixtures/          vulnerable sample app for the optional PR agent
 - `pnpm install`
 - `pnpm test`
 - `pnpm lint`
+- `pnpm typecheck`
+- `pnpm triage lint-logs <file.jsonl> [--json] [--min-percent=<n>]`
 - `pnpm sim --scenario=<n> --style=structured|legacy`
 - `pnpm triage ask "<question>"`
 - `pnpm evals`

@@ -1,0 +1,12 @@
+{
+  "name": "@triage/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "triage": "./src/main.ts"
+  },
+  "dependencies": {
+    "@triage/logger": "workspace:*"
+  }
+}
