@@ -31,6 +31,23 @@ Full spec: [`docs/logging-standard.md`](docs/logging-standard.md).
 9. `withLogging(handler)` logs start/end/duration/errors for Lambda-style handlers.
 10. `triage lint-logs` measures compliance per service and can gate CI.
 
+## The simulated platform
+
+Full description: [`docs/simulated-platform.md`](docs/simulated-platform.md).
+
+Five Lambda-style services (`intake`, `rx`, `scheduling`, `billing`, `notifications`) exchange simulated API Gateway, SQS and EventBridge events in virtual time. Six seeded fault scenarios each have a ground-truth root cause:
+
+| #   | Scenario                                         | Category   | Culprit       |
+| --- | ------------------------------------------------ | ---------- | ------------- |
+| 1   | Pharmacy partner returns 5xx                     | dependency | rx            |
+| 2   | DB pool exhaustion after a traffic spike         | timeout    | scheduling    |
+| 3   | Bad deploy renames payload fields                | data       | rx            |
+| 4   | Expired lab-results token                        | auth       | rx            |
+| 5   | DynamoDB hot partition throttling                | dependency | rx            |
+| 6   | SMS provider silently drops messages (no errors) | dependency | notifications |
+
+Each run is recorded once and rendered twice: **structured** (through `@triage/logger`, 100% compliant) and **legacy** (inconsistent per-service formats, no correlation IDs, 0% compliant). Both styles describe the identical incident, so log format is the only variable in the eval.
+
 ## Getting started
 
 Requires Node 20+ (see `.nvmrc`) and pnpm 10.
@@ -41,6 +58,8 @@ pnpm lint        # ESLint + Prettier check
 pnpm typecheck   # tsc, strict
 pnpm test        # Vitest
 pnpm triage lint-logs <file.jsonl>   # logging-standard compliance report
+pnpm sim --list                      # fault scenarios
+pnpm sim --scenario=3                # writes logs/scenario-3-.../{structured,legacy}/
 ```
 
 Copy `.env.example` to `.env` when the agent arrives in Phase 3.
