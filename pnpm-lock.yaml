@@ -48,6 +48,12 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
 
+  packages/sim:
+    dependencies:
+      '@triage/logger':
+        specifier: workspace:*
+        version: link:../logger
+
 packages:
 
   '@cacheable/memory@2.2.0':
