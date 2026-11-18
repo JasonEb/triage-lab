@@ -47,6 +47,7 @@ export interface RequestIds {
 }
 
 export interface Logger {
+  readonly service: string;
   readonly ids: RequestIds;
   debug(event: string, msg: string, fields?: LogFields): void;
   info(event: string, msg: string, fields?: LogFields): void;
@@ -124,6 +125,7 @@ export function createLogger(
   }
 
   return {
+    service: options.service,
     ids,
     debug: (e, m, f) => emit("debug", e, m, f),
     info: (e, m, f) => emit("info", e, m, f),
