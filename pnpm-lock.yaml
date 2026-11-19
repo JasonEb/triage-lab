@@ -38,9 +38,21 @@ importers:
 
   apps/cli:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^1.10.0
+        version: 1.10.0(zod@4.6.7)
+      '@triage/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
       '@triage/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@triage/sim':
+        specifier: workspace:*
+        version: link:../../packages/sim
+      '@triage/store':
+        specifier: workspace:*
+        version: link:../../packages/store
 
   packages/agent:
     dependencies:

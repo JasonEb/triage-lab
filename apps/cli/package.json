@@ -7,6 +7,10 @@
     "triage": "./src/main.ts"
   },
   "dependencies": {
-    "@triage/logger": "workspace:*"
+    "@anthropic-ai/sdk": "^1.10.0",
+    "@triage/agent": "workspace:*",
+    "@triage/logger": "workspace:*",
+    "@triage/sim": "workspace:*",
+    "@triage/store": "workspace:*"
   }
 }

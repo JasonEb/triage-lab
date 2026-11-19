@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { lintLogLines, type LintReport } from "@triage/logger";
+import { ask, ASK_USAGE, type AskDeps } from "./ask.js";
 
 export interface IO {
   out: (s: string) => void;
@@ -8,10 +9,12 @@ export interface IO {
 
 const USAGE = `Usage:
   triage lint-logs <file.jsonl> [--json] [--min-percent=<n>]
+${ASK_USAGE}
 
 Commands:
   lint-logs   Report the % of log lines that comply with the logging standard,
-              overall and by service. With --min-percent, exit 1 below the bar.`;
+              overall and by service. With --min-percent, exit 1 below the bar.
+  ask         Ask the read-only troubleshooting agent about a simulated incident.`;
 
 function formatReport(file: string, r: LintReport): string {
   const row = (name: string, c: number, t: number, p: number) =>
@@ -54,11 +57,13 @@ function lintLogs(args: string[], io: IO): number {
   return 0;
 }
 
-export async function run(argv: string[], io: IO): Promise<number> {
+export async function run(argv: string[], io: IO, deps: AskDeps = {}): Promise<number> {
   const [command, ...rest] = argv;
   switch (command) {
     case "lint-logs":
       return lintLogs(rest, io);
+    case "ask":
+      return ask(rest, io, deps);
     case undefined:
     case "help":
     case "--help":
