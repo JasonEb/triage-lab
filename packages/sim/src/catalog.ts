@@ -13,7 +13,7 @@ export interface Patient {
   prefers: "sms" | "email";
 }
 
-const FIRST = [
+export const SYNTHETIC_FIRST_NAMES = [
   "Alex",
   "Jordan",
   "Maria",
@@ -31,7 +31,7 @@ const FIRST = [
   "Zoe",
   "Mateo",
 ];
-const LAST = [
+export const SYNTHETIC_LAST_NAMES = [
   "Garcia",
   "Smith",
   "Nguyen",
@@ -51,8 +51,8 @@ const LAST = [
 export function makePatients(count: number, seed = 20261118): Patient[] {
   const rng = new Rng(seed);
   return Array.from({ length: count }, (_, i) => {
-    const first = rng.pick(FIRST);
-    const last = rng.pick(LAST);
+    const first = rng.pick(SYNTHETIC_FIRST_NAMES);
+    const last = rng.pick(SYNTHETIC_LAST_NAMES);
     return {
       id: `pt_${String(i + 1).padStart(5, "0")}`,
       name: `${first} ${last}`,
