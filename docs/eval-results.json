@@ -1,0 +1,1289 @@
+{
+  "meta": {
+    "generatedAt": "2026-11-19T04:07:02.590Z",
+    "model": "claude-haiku-5-5",
+    "effort": "low",
+    "maxSteps": 15,
+    "maxTokens": 500000,
+    "repeats": 3,
+    "scenarios": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "styles": [
+      "structured",
+      "legacy"
+    ],
+    "concurrency": 3,
+    "estimateUsd": 0.108,
+    "capUsd": 0.216,
+    "spentUsd": 0.09890393999999994,
+    "apiCalls": 177,
+    "planned": 36,
+    "wallSeconds": 196.129
+  },
+  "runs": [
+    {
+      "scenario": 1,
+      "slug": "pharmacy-5xx",
+      "style": "legacy",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        2479,
+        2793,
+        2794,
+        2800,
+        2398
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 9,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1992,
+        "cacheReadTokens": 17389,
+        "cacheWriteTokens": 9789,
+        "total": 29180
+      },
+      "costUsd": 0.0023945150000000003,
+      "wallMs": 16261,
+      "warnings": 0,
+      "summary": "Rx refill failures start around 14:00 UTC and are confined to pharmacy-a, an external pharmacy partner that started returning HTTP 503 for refill submissions. Retries began at 13:37 and errors at 14:00; pharmacy-b and the rx service's own code show no matching failures, and no deploy to rx occurred in the window. Likely partner-side outage; contain by routing around pharmacy-a if possible, and confirm with the partner."
+    },
+    {
+      "scenario": 1,
+      "slug": "pharmacy-5xx",
+      "style": "structured",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        6766,
+        7228,
+        7229,
+        7239,
+        7282
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2035,
+        "cacheReadTokens": 28620,
+        "cacheWriteTokens": 13593,
+        "total": 44260
+      },
+      "costUsd": 0.003004025,
+      "wallMs": 16964,
+      "warnings": 0,
+      "summary": "Rx refill failures start around 14:00 UTC and are confined to pharmacy-a, whose partner API returns HTTP 503. Retries began at 13:37 and failures from 14:00; pharmacy-b submissions continue normally, and no rx deploy occurred. Likely cause is an external pharmacy-a outage, not our code; route refills to pharmacy-b if routing allows, and contact the partner."
+    },
+    {
+      "scenario": 2,
+      "slug": "db-pool-exhaustion",
+      "style": "legacy",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "timeout",
+      "service": "scheduling",
+      "confidence": "medium",
+      "evidenceIds": [
+        7596,
+        7633,
+        7592,
+        7531
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 8,
+      "toolCalls": 14,
+      "usage": {
+        "inputTokens": 18,
+        "outputTokens": 3576,
+        "cacheReadTokens": 56883,
+        "cacheWriteTokens": 13796,
+        "total": 74273
+      },
+      "costUsd": 0.00408313,
+      "wallMs": 24041,
+      "warnings": 0,
+      "summary": "Appointment booking in scheduling has been failing since about 14:00 UTC because its database connection pool is saturated. The pool size is only 2, and from 14:00 booking traffic jumped to roughly 30x the prior rate, so requests queue for up to 5s and then time out. The 13:12 scheduling deploy (copy change) is unlikely to be the cause, and the logs do not show what triggered the load spike or whether the pool size changed."
+    },
+    {
+      "scenario": 2,
+      "slug": "db-pool-exhaustion",
+      "style": "structured",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "scheduling",
+      "confidence": "medium",
+      "evidenceIds": [
+        20401,
+        20485,
+        20484,
+        20400,
+        4956,
+        4973,
+        5321
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 8,
+      "toolCalls": 16,
+      "usage": {
+        "inputTokens": 18,
+        "outputTokens": 4018,
+        "cacheReadTokens": 64791,
+        "cacheWriteTokens": 15414,
+        "total": 84241
+      },
+      "costUsd": 0.00458546,
+      "wallMs": 31018,
+      "warnings": 0,
+      "summary": "Appointment booking failures start at about 14:00 UTC and clear by about 14:10. Scheduling's database connection pool (poolSize=2) is saturated by a roughly 100x burst of EventBridge-triggered handler runs, which follows a burst of intake form submissions at 14:00. Bookings time out with DB_POOL_TIMEOUT, about 1,133 failures in that window. No deploy lines up with the onset."
+    },
+    {
+      "scenario": 3,
+      "slug": "bad-deploy-payload",
+      "style": "legacy",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "validation",
+      "service": "rx",
+      "confidence": "high",
+      "evidenceIds": [
+        2255,
+        2256,
+        2253,
+        1497
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 7,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1771,
+        "cacheReadTokens": 22225,
+        "cacheWriteTokens": 12886,
+        "total": 36892
+      },
+      "costUsd": 0.0027195,
+      "wallMs": 11036,
+      "warnings": 0,
+      "summary": "Refill submissions to pharmacies stopped at 14:00 UTC, coinciding with rx v2.4.0 (commit 0b8dd1f, \"Refactor refill request payload to snake_case\"). Since the deploy, the rx SQS worker rejects every refill message with \"medicationId is required\" because the producer now sends medication_id, and the worker still reads camelCase medicationId. Refills were queued and submitted normally until 13:59 and none were submitted after 14:00."
+    },
+    {
+      "scenario": 3,
+      "slug": "bad-deploy-payload",
+      "style": "structured",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "validation",
+      "service": "rx",
+      "confidence": "high",
+      "evidenceIds": [
+        5604,
+        5605,
+        5610,
+        5519
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 3,
+      "toolCalls": 6,
+      "usage": {
+        "inputTokens": 8,
+        "outputTokens": 1588,
+        "cacheReadTokens": 8766,
+        "cacheWriteTokens": 9008,
+        "total": 19370
+      },
+      "costUsd": 0.00200846,
+      "wallMs": 9558,
+      "warnings": 0,
+      "summary": "Starting at 14:00:00 UTC, rx v2.4.0 (deployed 14:00, \"Refactor refill request payload to snake_case\") began receiving refill messages with snake_case keys (medication_id, patient_id, pharmacy_id, requires_labs, source), but the rx validator still requires camelCase medicationId. Every refill message now fails validation with PAYLOAD_SCHEMA_MISMATCH (517 parse/handler failures in the hour, 0 refill.submitted after 14:00 versus about 25-35 per 10 minutes before). The failures are a data/contract error introduced by the deploy, not a partner outage; the pharmacy submission stops because of it."
+    },
+    {
+      "scenario": 4,
+      "slug": "lab-token-expired",
+      "style": "legacy",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "auth",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        2290,
+        2667,
+        2668,
+        2676,
+        3297
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 8,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2012,
+        "cacheReadTokens": 27819,
+        "cacheWriteTokens": 13706,
+        "total": 43549
+      },
+      "costUsd": 0.00299864,
+      "wallMs": 13847,
+      "warnings": 0,
+      "summary": "Refills that require a lab-results check fail since about 14:00 UTC because the lab-partner-a results API started rejecting Honeydew's credentials with HTTP 401. Lab checks for the same partner succeeded until 13:59, and no rx deploy occurred in the window, so the likely trigger is a credential expiry or rotation on the partner side or in our secret config. Refills that do not depend on lab verification continue to succeed, which explains the partial failure."
+    },
+    {
+      "scenario": 4,
+      "slug": "lab-token-expired",
+      "style": "structured",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "auth",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        6714,
+        6715,
+        6710,
+        5486,
+        6742
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 2357,
+        "cacheReadTokens": 14735,
+        "cacheWriteTokens": 12188,
+        "total": 29290
+      },
+      "costUsd": 0.0028503499999999998,
+      "wallMs": 13887,
+      "warnings": 0,
+      "summary": "Starting at about 14:00:08Z, every refill that requires a lab-results check fails. The lab-results API (lab-partner-a) returns HTTP 401 LAB_AUTH_EXPIRED, so rx.labs.verified drops from about 7-11 per 10 minutes to zero. Refills that do not need a lab check still succeed, which is why only some refills fail. The likely cause is expired or rotated credentials for the lab partner integration, not a code change: no rx deploy occurred in the window."
+    },
+    {
+      "scenario": 5,
+      "slug": "dynamodb-hot-partition",
+      "style": "legacy",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        4081,
+        4153,
+        4161,
+        4162,
+        4083
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 8,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1912,
+        "cacheReadTokens": 14944,
+        "cacheWriteTokens": 7026,
+        "total": 23892
+      },
+      "costUsd": 0.00198469,
+      "wallMs": 12649,
+      "warnings": 0,
+      "summary": "Starting at 14:00 UTC, a pharmacy-a auto-refill batch (started 14:00:00) wrote many refill orders into the same DynamoDB partition key (rx-orders, pharmacy#pharmacy-a). The hot partition exceeded provisioned throughput, producing throttling warnings and ProvisionedThroughputExceeded errors, and about 200 refill order saves failed in the 14:00-14:12 window. Pharmacy-b refills stayed at baseline, and no deploy preceded the onset."
+    },
+    {
+      "scenario": 5,
+      "slug": "dynamodb-hot-partition",
+      "style": "structured",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        10938,
+        11044,
+        11053,
+        11069
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 12,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2236,
+        "cacheReadTokens": 21978,
+        "cacheWriteTokens": 8775,
+        "total": 33001
+      },
+      "costUsd": 0.002435855,
+      "wallMs": 14879,
+      "warnings": 0,
+      "summary": "At 14:00:00Z an auto-refill batch for pharmacy-a (count=400) started and its order writes all hit one DynamoDB partition key (pharmacy#pharmacy-a) on rx-orders. The hot partition throttled writes (ProvisionedThroughputExceededException), causing rx.order.write_throttled retries and about 201 refill orders that failed with DDB_THROTTLED after retries. No deploy in the window lines up with this; the batch burst is the trigger. Failed refills need to be confirmed recovered (no silent drops) and the batch should be spread out."
+    },
+    {
+      "scenario": 6,
+      "slug": "sms-silent-drop",
+      "style": "legacy",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "notifications",
+      "confidence": "medium",
+      "evidenceIds": [
+        819,
+        818,
+        1409,
+        1428,
+        1464,
+        914
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 6,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 2932,
+        "cacheReadTokens": 35659,
+        "cacheWriteTokens": 12421,
+        "total": 51026
+      },
+      "costUsd": 0.003376615,
+      "wallMs": 19188,
+      "warnings": 0,
+      "summary": "SMS delivery confirmations from sms-provider-a dropped to zero starting around 14:00Z, while SMS sends continued to be accepted by the same provider at normal volume. Patients who stopped receiving texts are consistent with this, but the logs show acceptance, not handset delivery, so the cause is most likely on the delivery-receipt path (provider callbacks or our ingestion of them) rather than the send path. No errors are logged for the SMS path. The notifications deploy at 14:21Z came after onset and does not explain it."
+    },
+    {
+      "scenario": 6,
+      "slug": "sms-silent-drop",
+      "style": "structured",
+      "repeat": 1,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "notifications",
+      "confidence": "medium",
+      "evidenceIds": [
+        4274,
+        4277,
+        4307,
+        4838
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 6,
+      "toolCalls": 11,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 3016,
+        "cacheReadTokens": 56081,
+        "cacheWriteTokens": 20979,
+        "total": 80090
+      },
+      "costUsd": 0.004692585,
+      "wallMs": 20624,
+      "warnings": 0,
+      "summary": "SMS delivery confirmations from sms-provider-a stopped at about 14:00Z on 2026-11-18, while SMS acceptances continued at their normal rate (about 33 per 10 minutes). Messages are being accepted by the provider but are not being confirmed as delivered, so patients are not receiving texts. No errors are logged for this, so it is a silent failure. Email delivery is unaffected, and the 14:21 notifications deploy came after the drop began."
+    },
+    {
+      "scenario": 1,
+      "slug": "pharmacy-5xx",
+      "style": "legacy",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        2479,
+        2793,
+        2794,
+        2791,
+        2792,
+        2044
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 8,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 1949,
+        "cacheReadTokens": 28664,
+        "cacheWriteTokens": 6820,
+        "total": 37445
+      },
+      "costUsd": 0.0021148399999999998,
+      "wallMs": 13553,
+      "warnings": 0,
+      "summary": "Rx refills began failing at about 14:00 UTC because partner pharmacy-a started returning HTTP 503 to every submission. The rx worker retries, then fails with TriageError, and those refills are not completed. Pharmacy-b requests are unaffected, and no Honeydew deploy touched rx in the window, so the fault appears to be on the partner side."
+    },
+    {
+      "scenario": 1,
+      "slug": "pharmacy-5xx",
+      "style": "structured",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        6766,
+        7228,
+        7229,
+        7226,
+        7227,
+        7281,
+        8731
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 12,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2441,
+        "cacheReadTokens": 33896,
+        "cacheWriteTokens": 11853,
+        "total": 48202
+      },
+      "costUsd": 0.0030422850000000005,
+      "wallMs": 15028,
+      "warnings": 0,
+      "summary": "Rx refill failures are caused by the external pharmacy partner pharmacy-a returning HTTP 503 to our refill submissions. The first 503 retry appears at 13:37 UTC, and hard failures (rx.refill.failed, PHARMACY_5XX) start at 14:00 and continue through 14:59. No rx deploy occurred in the window, so this looks like a partner-side outage rather than a regression on our side. Pharmacy-b shows only sporadic 503s, so the impact appears limited to pharmacy-a."
+    },
+    {
+      "scenario": 2,
+      "slug": "db-pool-exhaustion",
+      "style": "legacy",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "timeout",
+      "service": "scheduling",
+      "confidence": "medium",
+      "evidenceIds": [
+        7596,
+        7633,
+        7530,
+        7531,
+        150,
+        3166
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 6,
+      "toolCalls": 11,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 3367,
+        "cacheReadTokens": 36175,
+        "cacheWriteTokens": 9665,
+        "total": 49221
+      },
+      "costUsd": 0.0032547749999999997,
+      "wallMs": 21799,
+      "warnings": 0,
+      "summary": "Appointment booking in scheduling started failing at about 14:00 UTC because the service's database connection pool (poolSize 2) was saturated. Requests waited up to 5s for a connection and then failed with \"Timed out acquiring a database connection\". At the same time, booking volume jumped roughly 20-40x over the prior hour. The 13:12 scheduling deploy (copy change) is an unlikely cause; the logs do not show what drove the surge."
+    },
+    {
+      "scenario": 2,
+      "slug": "db-pool-exhaustion",
+      "style": "structured",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "timeout",
+      "service": "scheduling",
+      "confidence": "medium",
+      "evidenceIds": [
+        20401,
+        20484,
+        20485,
+        20387,
+        4763,
+        5015,
+        21000,
+        21070
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 7,
+      "toolCalls": 14,
+      "usage": {
+        "inputTokens": 16,
+        "outputTokens": 3822,
+        "cacheReadTokens": 72908,
+        "cacheWriteTokens": 18721,
+        "total": 95467
+      },
+      "costUsd": 0.004981805000000001,
+      "wallMs": 25570,
+      "warnings": 0,
+      "summary": "Appointment booking fails since ~14:00 UTC because scheduling's database connection pool (poolSize=2) is saturated by a sudden load surge. Intake form submissions and the EventBridge-triggered scheduling/notifications/billing handlers spike roughly 50-100x at 14:00, each booking waits up to 5s for a connection and times out with DB_POOL_TIMEOUT, and the EventBridge retries add more load. The scheduling deploy at 13:12 was a copy-only change and does not match the onset."
+    },
+    {
+      "scenario": 3,
+      "slug": "bad-deploy-payload",
+      "style": "legacy",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "validation",
+      "service": "rx",
+      "confidence": "high",
+      "evidenceIds": [
+        2255,
+        2256,
+        1497,
+        1495
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 3,
+      "toolCalls": 6,
+      "usage": {
+        "inputTokens": 8,
+        "outputTokens": 1921,
+        "cacheReadTokens": 17423,
+        "cacheWriteTokens": 4257,
+        "total": 23609
+      },
+      "costUsd": 0.001667655,
+      "wallMs": 9476,
+      "warnings": 0,
+      "summary": "Starting at 14:00:00 UTC, every refill message reaching the rx SQS worker fails parsing with \"medicationId is required\", so no refills are submitted to pharmacies. This coincides exactly with the rx v2.4.0 deploy (commit 0b8dd1f, \"Refactor refill request payload to snake_case\") at 14:00:00. The likely cause is that the producer now sends snake_case fields (medication_id, as the validation message lists) while the worker still expects camelCase medicationId. Rolling back rx to v2.4.0's predecessor, or hotfixing the parser to accept the new field names, should restore flow."
+    },
+    {
+      "scenario": 3,
+      "slug": "bad-deploy-payload",
+      "style": "structured",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "validation",
+      "service": "rx",
+      "confidence": "high",
+      "evidenceIds": [
+        5604,
+        5605,
+        5610,
+        5519,
+        5544
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 8,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1923,
+        "cacheReadTokens": 20708,
+        "cacheWriteTokens": 2186,
+        "total": 24827
+      },
+      "costUsd": 0.00144283,
+      "wallMs": 12698,
+      "warnings": 0,
+      "summary": "Refill messages stopped reaching pharmacies at 14:00 UTC, right after rx v2.4.0 deployed at 14:00:00 (commit 0b8dd1f, \"Refactor refill request payload to snake_case\"). The rx SQS worker now receives snake_case keys (medication_id, patient_id, pharmacy_id) but its validator still requires camelCase medicationId, so every refill message fails with PAYLOAD_SCHEMA_MISMATCH and is never submitted. Rollback or a consumer/producer schema fix is needed to restore refills."
+    },
+    {
+      "scenario": 4,
+      "slug": "lab-token-expired",
+      "style": "legacy",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "auth",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        1833,
+        2667,
+        2668,
+        2676
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 7,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1847,
+        "cacheReadTokens": 19708,
+        "cacheWriteTokens": 7764,
+        "total": 29329
+      },
+      "costUsd": 0.00209208,
+      "wallMs": 12635,
+      "warnings": 0,
+      "summary": "Refills that require a lab-results check are failing because lab-partner-a's results API has been rejecting our credentials with HTTP 401 since about 14:00:08 UTC. Before 14:00, the same lab check succeeded (\"Required lab results verified\"), and refills without that dependency are unaffected, which is why only some refills fail. The 401 pattern points to a credential or auth change on the lab partner side or in our rx config, not to a code deploy (no rx deploys in the window)."
+    },
+    {
+      "scenario": 4,
+      "slug": "lab-token-expired",
+      "style": "structured",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "auth",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        6714,
+        6715,
+        6741,
+        5486,
+        6710
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 11,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2197,
+        "cacheReadTokens": 26824,
+        "cacheWriteTokens": 7468,
+        "total": 36501
+      },
+      "costUsd": 0.00230144,
+      "wallMs": 14519,
+      "warnings": 0,
+      "summary": "Starting at about 14:00 UTC, rx refill requests that require a lab results check fail with LAB_AUTH_EXPIRED, because the lab results API (lab-partner-a) returns HTTP 401 for rx's credentials. Refills that don't need a lab check still complete, which is why only some refills fail. The 'rx.labs.verified' success line stops entirely at 14:00, so the lab credentials likely expired or were rotated around that time. No rx deploy occurred in the window, so this looks like a credential expiry on our side or the partner's side, not a code change."
+    },
+    {
+      "scenario": 5,
+      "slug": "dynamodb-hot-partition",
+      "style": "legacy",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        4081,
+        4153,
+        4161,
+        4162,
+        4083
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 3,
+      "toolCalls": 7,
+      "usage": {
+        "inputTokens": 8,
+        "outputTokens": 2082,
+        "cacheReadTokens": 13390,
+        "cacheWriteTokens": 6260,
+        "total": 21740
+      },
+      "costUsd": 0.0019582000000000002,
+      "wallMs": 12551,
+      "warnings": 0,
+      "summary": "Starting at about 14:00 UTC, an auto-refill batch for pharmacy-a (batch of 400) began writing to the rx-orders DynamoDB table, all under the same partition key (pharmacy#pharmacy-a). That hot partition exceeded its provisioned throughput, so order writes were throttled, and about 201 refill orders failed to save after retries. Pharmacy-b refills and other traffic show no comparable errors, so the fault is isolated to the pharmacy-a key. Writes were still failing at the end of the window, so failed refills need a retry or redrive."
+    },
+    {
+      "scenario": 5,
+      "slug": "dynamodb-hot-partition",
+      "style": "structured",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        10938,
+        11044,
+        11054,
+        11053,
+        11040,
+        11048
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2218,
+        "cacheReadTokens": 24691,
+        "cacheWriteTokens": 7809,
+        "total": 34730
+      },
+      "costUsd": 0.0023332350000000003,
+      "wallMs": 14997,
+      "warnings": 0,
+      "summary": "Starting at 14:00:00Z, an EventBridge-triggered auto-refill batch for pharmacy-a (count=400) ran at the same moment as patient refill traffic. All order writes go to the rx-orders table under partition key pharmacy#pharmacy-a, so the batch concentrated writes on one DynamoDB partition. That partition throttled (rx.order.write_throttled, 727 events; DDB_THROTTLED failures, 201 handler and order-write failures, all 14:00-14:12). Refill volume roughly tripled in that window, and some refills failed while others succeeded after retries. The three deploys in the window (scheduling, billing, notifications) do not match the timing and are not the cause."
+    },
+    {
+      "scenario": 6,
+      "slug": "sms-silent-drop",
+      "style": "legacy",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "notifications",
+      "confidence": "medium",
+      "evidenceIds": [
+        819,
+        818,
+        1428,
+        1438,
+        1424,
+        914
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2621,
+        "cacheReadTokens": 32953,
+        "cacheWriteTokens": 9193,
+        "total": 44779
+      },
+      "costUsd": 0.002790355,
+      "wallMs": 17296,
+      "warnings": 0,
+      "summary": "SMS messages sent through sms-provider-a are being accepted by our notifications service but no longer confirmed as delivered after about 14:00Z on 2026-11-18. Delivery-confirmation webhooks drop from roughly 30-40 per 10 minutes to zero from the 14:00 bucket onward, while acceptances continue at normal volume. No errors are logged, so this is a silent downstream delivery failure at the SMS provider or carrier path, not a failure in our code. Email and other services are not implicated; deploys near the start (scheduling 13:12, billing 13:47, notifications v2.9.0 at 14:21) do not line up with the 14:00 cutoff."
+    },
+    {
+      "scenario": 6,
+      "slug": "sms-silent-drop",
+      "style": "structured",
+      "repeat": 2,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "notifications",
+      "confidence": "low",
+      "evidenceIds": [],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 0
+      },
+      "steps": 6,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 2334,
+        "cacheReadTokens": 58555,
+        "cacheWriteTokens": 18007,
+        "total": 78910
+      },
+      "costUsd": 0.004004825,
+      "wallMs": 16065,
+      "warnings": 2,
+      "summary": "SMS delivery confirmations from sms-provider-a stopped at about 14:00Z on 2026-11-18, while the platform kept sending and the provider kept accepting messages. Patients are not receiving texts because the messages are not reaching handsets, and our pipeline shows no error for it. Email delivery is unaffected. The deploys in the window (billing 13:47, notifications 14:21) do not line up with the 14:00 onset."
+    },
+    {
+      "scenario": 1,
+      "slug": "pharmacy-5xx",
+      "style": "legacy",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        2479,
+        2793,
+        2794,
+        2828
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 9,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1924,
+        "cacheReadTokens": 22842,
+        "cacheWriteTokens": 3967,
+        "total": 28743
+      },
+      "costUsd": 0.0016872950000000001,
+      "wallMs": 12832,
+      "warnings": 0,
+      "summary": "Refills routed to pharmacy-a began failing with HTTP 503 from the partner at about 13:37-14:00 UTC, and the rx worker's retries are exhausting and surfacing as TriageErrors. pharmacy-b refills are unaffected (only 2 retry warnings in the window), and no deploy to rx occurred in the window; the deploys to scheduling, billing and notifications are not on the failing path. This points to a pharmacy-a partner-side outage rather than our code."
+    },
+    {
+      "scenario": 1,
+      "slug": "pharmacy-5xx",
+      "style": "structured",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        7228,
+        7226,
+        6766,
+        7281,
+        7019
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 10,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2005,
+        "cacheReadTokens": 30969,
+        "cacheWriteTokens": 6012,
+        "total": 38998
+      },
+      "costUsd": 0.0020648899999999998,
+      "wallMs": 12987,
+      "warnings": 0,
+      "summary": "Rx refill failures start at about 14:00 UTC and are caused by pharmacy-a returning HTTP 503 from the external pharmacy partner. rx.refill.failed (PHARMACY_5XX) and the retry lines all name pharmacy=pharmacy-a, while pharmacy-b shows only sporadic single 503 retries. No rx deploy occurred in the window; the deploys at 13:12, 13:47 and 14:21 are in other services and don't line up with the rx errors. Mitigation is to contain the partner outage and route around pharmacy-a if possible, then redrive failed refills once it recovers."
+    },
+    {
+      "scenario": 2,
+      "slug": "db-pool-exhaustion",
+      "style": "legacy",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "timeout",
+      "service": "scheduling",
+      "confidence": "medium",
+      "evidenceIds": [
+        7633,
+        7596,
+        7576,
+        7531,
+        7530
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 8,
+      "toolCalls": 14,
+      "usage": {
+        "inputTokens": 18,
+        "outputTokens": 3986,
+        "cacheReadTokens": 58364,
+        "cacheWriteTokens": 10259,
+        "total": 72627
+      },
+      "costUsd": 0.0038608149999999996,
+      "wallMs": 26640,
+      "warnings": 0,
+      "summary": "Appointment booking failures start at 14:00 UTC in the scheduling service, which logs its database connection pool as size 2. Every booking request waits up to 5000ms for a connection and then fails. The failures coincide with a sharp burst of booking traffic from 14:00 to about 14:10, and they stop when that burst ends. The logs do not show what drove the burst or why the pool is so small, and I found no log evidence tying it to the 13:12 scheduling deploy."
+    },
+    {
+      "scenario": 2,
+      "slug": "db-pool-exhaustion",
+      "style": "structured",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "scheduling",
+      "confidence": "medium",
+      "evidenceIds": [
+        20484,
+        20401,
+        20475,
+        20390,
+        4956,
+        20395
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 6,
+      "toolCalls": 13,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 3487,
+        "cacheReadTokens": 50553,
+        "cacheWriteTokens": 14028,
+        "total": 68082
+      },
+      "costUsd": 0.00400393,
+      "wallMs": 23228,
+      "warnings": 0,
+      "summary": "Appointment booking failures from about 14:00 to 14:10 UTC are caused by scheduling's database connection pool saturating under a sudden burst of EventBridge-triggered work. Scheduling handler starts jumped from about 20 per 10 minutes to about 2,000, and the pool (poolSize=2) was exhausted, so requests timed out with DB_POOL_TIMEOUT. Load tapered after about 14:10 and the errors stopped, but the initial trigger of the burst is not yet identified."
+    },
+    {
+      "scenario": 3,
+      "slug": "bad-deploy-payload",
+      "style": "legacy",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "validation",
+      "service": "rx",
+      "confidence": "high",
+      "evidenceIds": [
+        2255,
+        2256,
+        1497,
+        1506
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 3,
+      "toolCalls": 6,
+      "usage": {
+        "inputTokens": 8,
+        "outputTokens": 1701,
+        "cacheReadTokens": 13549,
+        "cacheWriteTokens": 7709,
+        "total": 22967
+      },
+      "costUsd": 0.001950415,
+      "wallMs": 8742,
+      "warnings": 0,
+      "summary": "Starting at 14:00:00Z, rx v2.4.0 (deployed at 14:00:00, \"Refactor refill request payload to snake_case\") began emitting refill messages with snake_case fields (medication_id, patient_id, pharmacy_id, requires_labs). The rx worker's parseRefillMessage still requires camelCase medicationId, so every refill message fails validation with TriageError \"medicationId is required\". Refill submissions to pharmacy-a/pharmacy-b drop to zero from 14:00 onward, while 517 such failures occur in the hour. The fault is the payload contract change in the deploy, not a partner outage."
+    },
+    {
+      "scenario": 3,
+      "slug": "bad-deploy-payload",
+      "style": "structured",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "validation",
+      "service": "rx",
+      "confidence": "high",
+      "evidenceIds": [
+        5604,
+        5610,
+        5605,
+        4484
+      ],
+      "score": {
+        "category": 0,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 7,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1698,
+        "cacheReadTokens": 21826,
+        "cacheWriteTokens": 1779,
+        "total": 25313
+      },
+      "costUsd": 0.001290635,
+      "wallMs": 10190,
+      "warnings": 0,
+      "summary": "Refill processing in rx stopped at 14:00 UTC, the same minute rx v2.4.0 deployed (refactor of the refill request payload to snake_case). From 14:00 every refill message fails validation with PAYLOAD_SCHEMA_MISMATCH because the consumer expects camelCase medicationId, while messages now arrive with medication_id, patient_id, pharmacy_id, requires_labs, source. Successful rx.refill.submitted events fall to zero from 14:00, so refills are not reaching pharmacies. Recommend rolling back rx to v2.4.0's predecessor, then redriving failed messages."
+    },
+    {
+      "scenario": 4,
+      "slug": "lab-token-expired",
+      "style": "legacy",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "auth",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        2667,
+        2668,
+        2290,
+        2646,
+        3297
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 7,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1711,
+        "cacheReadTokens": 22314,
+        "cacheWriteTokens": 8342,
+        "total": 32377
+      },
+      "costUsd": 0.00212239,
+      "wallMs": 12288,
+      "warnings": 0,
+      "summary": "Starting at 14:00:08Z, every refill that requires a lab-partner-a check fails: the lab results API returns HTTP 401 (credentials rejected), so rx rejects or errors those refills. Refills that do not depend on that check continue to succeed, which is why only some refills fail. No rx deploy preceded the onset; the only nearby deploys are in scheduling, billing and notifications, which do not touch the lab call. Likely cause is a lab-partner-a credential/key expiry or rotation on the partner side or in our secret config, which needs confirmation."
+    },
+    {
+      "scenario": 4,
+      "slug": "lab-token-expired",
+      "style": "structured",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "auth",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        6645,
+        6714,
+        6715,
+        6729,
+        6711,
+        7551
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 9,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 2259,
+        "cacheReadTokens": 19747,
+        "cacheWriteTokens": 8786,
+        "total": 30802
+      },
+      "costUsd": 0.00242622,
+      "wallMs": 12465,
+      "warnings": 0,
+      "summary": "Starting at about 14:00:08Z, every refill that requires a lab-results check fails in rx. The lab results API (lab-partner-a) returns HTTP 401 LAB_AUTH_EXPIRED, so rx.labs.verified stops completely and the SQS handler retries end in rx.handler.failed. Refills that do not need a lab check still complete, which is why only some refills fail. No deploy to rx occurred in the window, so the likely cause is expired or rotated lab partner credentials."
+    },
+    {
+      "scenario": 5,
+      "slug": "dynamodb-hot-partition",
+      "style": "legacy",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        4081,
+        4153,
+        4161,
+        4162
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 8,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 1860,
+        "cacheReadTokens": 21114,
+        "cacheWriteTokens": 1369,
+        "total": 24353
+      },
+      "costUsd": 0.0013132649999999999,
+      "wallMs": 12213,
+      "warnings": 0,
+      "summary": "Starting at about 14:00 UTC, the rx auto-refill batch for pharmacy-a (400 refills) began writing refill orders to the rx-orders DynamoDB table all under the same partition key (pharmacy#pharmacy-a). That hot partition exceeded its provisioned throughput, so order writes were throttled (ProvisionedThroughputExceededException), and about 201 refill orders failed to save between 14:00 and 14:12. Throttling is confined to the pharmacy-a key; pharmacy-b refills stayed flat. The deploys in the window (scheduling, billing, notifications) do not match this failure."
+    },
+    {
+      "scenario": 5,
+      "slug": "dynamodb-hot-partition",
+      "style": "structured",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "rx",
+      "confidence": "medium",
+      "evidenceIds": [
+        10938,
+        11044,
+        11045,
+        11052,
+        11053,
+        11054
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 4,
+      "toolCalls": 8,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 2036,
+        "cacheReadTokens": 22598,
+        "cacheWriteTokens": 5075,
+        "total": 29719
+      },
+      "costUsd": 0.001879355,
+      "wallMs": 13539,
+      "warnings": 0,
+      "summary": "Starting at about 14:00:00Z, an auto-refill batch for pharmacy-a (400 refills) began writing orders to rx-orders under a single partition key, pharmacy#pharmacy-a. DynamoDB throttled those writes (hot partition), and after retries about 200 order writes failed with DDB_THROTTLED, so the affected refills failed and handler latency rose. Likely fix: pause or slow the batch, make sure failed writes are retried or redriven, and verify no orders were dropped."
+    },
+    {
+      "scenario": 6,
+      "slug": "sms-silent-drop",
+      "style": "legacy",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "notifications",
+      "confidence": "medium",
+      "evidenceIds": [
+        819,
+        1427,
+        1428,
+        818,
+        914
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 5,
+      "toolCalls": 9,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 2152,
+        "cacheReadTokens": 36708,
+        "cacheWriteTokens": 11815,
+        "total": 50687
+      },
+      "costUsd": 0.002921155,
+      "wallMs": 14597,
+      "warnings": 0,
+      "summary": "SMS delivery confirmations from sms-provider-a stopped at about 14:00Z on 2026-11-18, while the service kept accepting SMS sends to that provider at the normal rate. Patients are likely not receiving texts even though no errors are logged. Email and other providers are unaffected. This matches the notification-delivery runbook's silent-failure pattern."
+    },
+    {
+      "scenario": 6,
+      "slug": "sms-silent-drop",
+      "style": "structured",
+      "repeat": 3,
+      "outcome": "diagnosed",
+      "category": "dependency",
+      "service": "notifications",
+      "confidence": "medium",
+      "evidenceIds": [
+        4025,
+        4184,
+        4277,
+        4307,
+        4286
+      ],
+      "score": {
+        "category": 1,
+        "service": 1,
+        "evidence": 1
+      },
+      "steps": 6,
+      "toolCalls": 12,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 2904,
+        "cacheReadTokens": 58240,
+        "cacheWriteTokens": 17837,
+        "total": 78995
+      },
+      "costUsd": 0.004265425,
+      "wallMs": 19457,
+      "warnings": 0,
+      "summary": "SMS delivery to patients appears to have failed silently from about 14:00 UTC. sms-provider-a keeps accepting our messages, but delivery confirmations dropped from about 42 per 10 minutes to zero, and no errors or warnings were logged. Email (email-provider-b) is unaffected, and the notifications deploy at 14:21 came after the drop began, so it is not the trigger. The likely cause is on the SMS provider's delivery path, which is outside our code. Mitigate by failing critical messages over to email or a backup SMS provider, and confirm with the provider and our account status."
+    }
+  ]
+}
