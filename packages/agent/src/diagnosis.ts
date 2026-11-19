@@ -3,13 +3,26 @@ import { z } from "zod";
 
 export const ROOT_CAUSE_CATEGORIES = [...ERROR_TYPES, "insufficient_data"] as const;
 
+/**
+ * Where a diagnosis can place the fault: one of our services, or "" if unknown.
+ * A bounded value (like an event name) so answers can be compared and scored;
+ * external partners and dependencies are named in the free-text description.
+ */
+export const PLATFORM_SERVICES = [
+  "intake",
+  "rx",
+  "scheduling",
+  "billing",
+  "notifications",
+] as const;
+
 /** The agent's final answer. Submitted through the submit_diagnosis tool. */
 export const DiagnosisSchema = z.strictObject({
   summary: z.string().min(1),
   suspectedRootCause: z.strictObject({
     category: z.enum(ROOT_CAUSE_CATEGORIES),
-    /** Service where the fault is, or "" if unknown. */
-    service: z.string(),
+    /** Our service where the fault originates or surfaces, or "" if unknown. */
+    service: z.enum([...PLATFORM_SERVICES, ""]),
     description: z.string(),
   }),
   evidence: z.array(z.strictObject({ lineId: z.number().int(), reason: z.string() })),
@@ -47,7 +60,9 @@ export const DIAGNOSIS_JSON_SCHEMA = {
         },
         service: {
           type: "string",
-          description: 'Service where the fault originates, or "" if unknown.',
+          enum: [...PLATFORM_SERVICES, ""],
+          description:
+            'Our service where the fault originates or first surfaces, or "" if unknown. Name an external partner or dependency in description, not here.',
         },
         description: { type: "string", description: "What broke, where, since when, and why." },
       },

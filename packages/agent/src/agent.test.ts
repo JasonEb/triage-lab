@@ -2,10 +2,17 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
-import { makePatients, runSimCli, SYNTHETIC_FIRST_NAMES, SYNTHETIC_LAST_NAMES } from "@triage/sim";
+import {
+  makePatients,
+  runSimCli,
+  SERVICES,
+  SYNTHETIC_FIRST_NAMES,
+  SYNTHETIC_LAST_NAMES,
+} from "@triage/sim";
 import { LogStore } from "@triage/store";
 import { beforeAll, describe, expect, it } from "vitest";
 import { runAgent, type MessagesClient } from "./agent.js";
+import { PLATFORM_SERVICES } from "./diagnosis.js";
 import { executeTool, TOOL_DEFINITIONS, type ToolName } from "./tools.js";
 
 type Message = Anthropic.Beta.Messages.BetaMessage;
@@ -181,6 +188,28 @@ describe("runAgent", () => {
     });
     expect(r.steps).toBe(2);
     expect(r.toolCalls.map((t) => t.ok)).toEqual([false, true]);
+  });
+
+  it("rejects a culprit outside our services, so answers stay comparable", async () => {
+    const external = diagnosis([]);
+    external.suspectedRootCause.service = "pharmacy-a (external partner)";
+    const { client, calls } = scripted([
+      () => msg([toolUse("a", "submit_diagnosis", external)], "tool_use"),
+      () => msg([toolUse("b", "submit_diagnosis", diagnosis([]))], "tool_use"),
+    ]);
+    const r = await runAgent({
+      client,
+      model: "claude-sonnet-5-5",
+      question: "?",
+      store: structured,
+    });
+    expect(r.toolCalls.map((t) => t.ok)).toEqual([false, true]);
+    expect(JSON.stringify(calls[1]!.messages.at(-1))).toContain("Invalid diagnosis");
+    expect(r.diagnosis.suspectedRootCause.service).toBe("rx");
+  });
+
+  it("lists the same services as the simulator", () => {
+    expect([...PLATFORM_SERVICES]).toEqual([...SERVICES]);
   });
 
   it("lowers confidence when no valid evidence is cited", async () => {
