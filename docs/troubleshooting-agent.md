@@ -54,14 +54,14 @@ A manual Messages API loop, not the SDK's beta tool runner, so that four things 
 
 Request settings: model from `TRIAGE_MODEL` (default `claude-sonnet-5-5`, per PLAN.md); adaptive thinking (the model default); `effort: medium` (`TRIAGE_EFFORT`); prompt caching on the stable prefix (system prompt and tools; the per-run data summary goes in the first user message); full assistant content appended back, so the history is append-only and thinking blocks are preserved; and server-side refusal fallbacks (`fallbacks: "default"`) on models that support them.
 
-Answer shape:
+Answer shape (`service` is one of our services, so answers can be scored; external partners are named in `description`):
 
 ```json
 {
   "summary": "...",
   "suspectedRootCause": {
     "category": "dependency | timeout | auth | data | validation | unknown | insufficient_data",
-    "service": "rx",
+    "service": "intake | rx | scheduling | billing | notifications | \"\"",
     "description": "..."
   },
   "evidence": [{ "lineId": 1234, "reason": "..." }],

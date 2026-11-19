@@ -51,4 +51,4 @@ fixtures/          vulnerable sample app for the optional PR agent
 - `pnpm triage lint-logs <file.jsonl> [--json] [--min-percent=<n>]`
 - `pnpm sim --scenario=<n|all> [--style=structured|legacy] [--seed=<n>] [--out=<dir>]` (writes to `logs/`, git-ignored; `--list` shows scenarios)
 - `pnpm triage ask "<question>" --scenario=<n> [--style=structured|legacy] [--verbose] [--json]` (needs `TRIAGE_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY`; run `pnpm sim` first)
-- `pnpm evals`
+- `pnpm evals [--repeats=<n>] [--scenarios=<1,2|all>] [--styles=structured,legacy] [--estimate=<usd>|--max-cost=<usd>] [--fake] [--report-only]` (writes `docs/eval-report.md` + `docs/eval-results.json`; hard cost cap, default $1; `--fake` needs no key)
