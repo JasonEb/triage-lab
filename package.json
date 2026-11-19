@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "triage": "tsx apps/cli/src/main.ts",
-    "sim": "tsx packages/sim/src/main.ts"
+    "sim": "tsx packages/sim/src/main.ts",
+    "evals": "tsx packages/evals/src/main.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
