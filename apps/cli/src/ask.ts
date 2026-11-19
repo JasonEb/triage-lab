@@ -29,12 +29,40 @@ export const AGENT_REDACTION: RedactOptions = {
 export const ASK_USAGE = `  triage ask "<question>" --scenario=<n> [--style=structured|legacy] [--logs=<dir>] [--json] [--verbose]
               [--max-steps=<n>] [--max-tokens=<n>] [--effort=low|medium|high|xhigh|max]
 
-  Env: ANTHROPIC_API_KEY (required), TRIAGE_MODEL (default ${DEFAULT_MODEL}), TRIAGE_EFFORT, TRIAGE_MAX_STEPS, TRIAGE_MAX_TOKENS`;
+  Env: TRIAGE_ANTHROPIC_API_KEY or ANTHROPIC_API_KEY (required), TRIAGE_ANTHROPIC_BASE_URL, TRIAGE_MODEL (default ${DEFAULT_MODEL}), TRIAGE_EFFORT, TRIAGE_MAX_STEPS, TRIAGE_MAX_TOKENS`;
 
 export interface AskDeps {
   client?: MessagesClient;
   env?: Record<string, string | undefined>;
   cwd?: string;
+}
+
+export const DEFAULT_BASE_URL = "https://api.anthropic.com";
+
+/**
+ * Build the Claude client from triage's own settings, not the SDK's ambient ones.
+ * Hosted coding environments (e.g. Claude Code on the web) reserve ANTHROPIC_API_KEY
+ * and set ANTHROPIC_BASE_URL / ANTHROPIC_AUTH_TOKEN for their own use; picking those
+ * up would send the agent's traffic to the wrong endpoint or bill the wrong account.
+ * So: TRIAGE_ANTHROPIC_API_KEY wins, ANTHROPIC_API_KEY is the local-.env fallback,
+ * the base URL is explicit, and an ambient auth token is never sent.
+ */
+export function createClient(
+  env: Record<string, string | undefined>,
+): { client: Anthropic } | { error: string } {
+  const apiKey = env.TRIAGE_ANTHROPIC_API_KEY || env.ANTHROPIC_API_KEY;
+  if (!apiKey)
+    return {
+      error:
+        "No API key. Set TRIAGE_ANTHROPIC_API_KEY (or ANTHROPIC_API_KEY) in a git-ignored .env (see .env.example) or export it.",
+    };
+  return {
+    client: new Anthropic({
+      apiKey,
+      authToken: null,
+      baseURL: env.TRIAGE_ANTHROPIC_BASE_URL || DEFAULT_BASE_URL,
+    }),
+  };
 }
 
 const flag = (args: string[], name: string) =>
@@ -81,13 +109,12 @@ export async function ask(args: string[], io: IO, deps: AskDeps = {}): Promise<n
 
   let client = deps.client;
   if (!client) {
-    if (!env.ANTHROPIC_API_KEY && !env.ANTHROPIC_AUTH_TOKEN) {
-      io.err(
-        "ANTHROPIC_API_KEY is not set. Put it in a git-ignored .env (see .env.example) or export it.",
-      );
+    const made = createClient(env);
+    if ("error" in made) {
+      io.err(made.error);
       return 2;
     }
-    client = new Anthropic().beta.messages;
+    client = made.client.beta.messages;
   }
 
   const store = LogStore.fromScenarioDir(dir, style);
@@ -120,7 +147,9 @@ export async function ask(args: string[], io: IO, deps: AskDeps = {}): Promise<n
     });
   } catch (err) {
     if (err instanceof Anthropic.AuthenticationError)
-      io.err("The Claude API rejected the API key (401). Check ANTHROPIC_API_KEY.");
+      io.err(
+        "The Claude API rejected the API key (401). Check TRIAGE_ANTHROPIC_API_KEY / ANTHROPIC_API_KEY.",
+      );
     else if (err instanceof Anthropic.RateLimitError)
       io.err("Rate limited by the Claude API (429). Try again shortly.");
     else if (err instanceof Anthropic.APIError)

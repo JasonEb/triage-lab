@@ -5,6 +5,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import type { MessagesClient } from "@triage/agent";
 import { runSimCli } from "@triage/sim";
 import { beforeAll, describe, expect, it } from "vitest";
+import { createClient, DEFAULT_BASE_URL } from "./ask.js";
 import { run } from "./cli.js";
 
 type Message = Anthropic.Beta.Messages.BetaMessage;
@@ -138,7 +139,7 @@ describe("triage ask", () => {
     expect(
       await run(["ask", "q", "--scenario=4", `--logs=${logs}`], a.io, { cwd: repo, env: {} }),
     ).toBe(2);
-    expect(a.err.join("\n")).toMatch(/ANTHROPIC_API_KEY is not set/);
+    expect(a.err.join("\n")).toMatch(/No API key\. Set TRIAGE_ANTHROPIC_API_KEY/);
 
     const b = capture();
     expect(
@@ -152,5 +153,38 @@ describe("triage ask", () => {
     const c = capture();
     expect(await run(["ask", "--scenario=4"], c.io, { client: fakeAgent(), env: {} })).toBe(2);
     expect(c.err.join("\n")).toMatch(/a question is required/);
+  });
+});
+
+describe("createClient", () => {
+  const hosted = {
+    ANTHROPIC_BASE_URL: "http://127.0.0.1:9999/host-proxy",
+    ANTHROPIC_AUTH_TOKEN: "host-session-token",
+  };
+
+  it("prefers TRIAGE_ANTHROPIC_API_KEY and ignores the host's base URL and auth token", () => {
+    const made = createClient({
+      ...hosted,
+      ANTHROPIC_API_KEY: "sk-ant-fallback",
+      TRIAGE_ANTHROPIC_API_KEY: "sk-ant-triage",
+    });
+    if ("error" in made) throw new Error(made.error);
+    expect(made.client.apiKey).toBe("sk-ant-triage");
+    expect(made.client.authToken).toBeNull();
+    expect(made.client.baseURL).toBe(DEFAULT_BASE_URL);
+  });
+
+  it("falls back to ANTHROPIC_API_KEY and honours TRIAGE_ANTHROPIC_BASE_URL", () => {
+    const made = createClient({
+      ANTHROPIC_API_KEY: "sk-ant-local",
+      TRIAGE_ANTHROPIC_BASE_URL: "https://example.test",
+    });
+    if ("error" in made) throw new Error(made.error);
+    expect(made.client.apiKey).toBe("sk-ant-local");
+    expect(made.client.baseURL).toBe("https://example.test");
+  });
+
+  it("refuses to fall back to an ambient auth token", () => {
+    expect(createClient(hosted)).toEqual({ error: expect.stringMatching(/No API key/) });
   });
 });

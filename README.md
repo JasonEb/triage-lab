@@ -71,6 +71,6 @@ pnpm test        # Vitest
 pnpm triage lint-logs <file.jsonl>   # logging-standard compliance report
 pnpm sim --list                      # fault scenarios
 pnpm sim --scenario=3                # writes logs/scenario-3-.../{structured,legacy}/
-cp .env.example .env                 # set ANTHROPIC_API_KEY
+cp .env.example .env                 # set TRIAGE_ANTHROPIC_API_KEY
 pnpm triage ask "Refills stopped going through around 14:00" --scenario=3 --verbose
 ```

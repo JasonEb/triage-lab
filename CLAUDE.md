@@ -11,7 +11,7 @@ Portfolio prototype for a Honeydew (virtual dermatology platform) Senior Softwar
 ## Hard rules
 - **Synthetic data only.** Never use or generate real PHI/PII. Patient identifiers in logs are hashed. Redact before any text reaches an LLM.
 - **Agent is read-only.** Troubleshooting tools never mutate anything. The PR agent only runs against local fixtures or `--dry-run`, never merges, and only runs allowlisted commands.
-- **Never commit secrets.** `ANTHROPIC_API_KEY` lives in a git-ignored `.env`. Keep `.env.example` up to date.
+- **Never commit secrets.** The Claude API key (`TRIAGE_ANTHROPIC_API_KEY`, or `ANTHROPIC_API_KEY` locally) lives in a git-ignored `.env` or the environment. Keep `.env.example` up to date.
 - **One phase at a time.** Stop at the phase's "Done when" criteria, then summarize what you built, what you verified, and what's next. Do not start the next phase.
 - **Small commits.** Commit logical steps with clear messages.
 - **Tests are required.** Write tests first where practical (Vitest). Don't mark a phase done with failing or missing tests.
@@ -50,5 +50,5 @@ fixtures/          vulnerable sample app for the optional PR agent
 - `pnpm typecheck`
 - `pnpm triage lint-logs <file.jsonl> [--json] [--min-percent=<n>]`
 - `pnpm sim --scenario=<n|all> [--style=structured|legacy] [--seed=<n>] [--out=<dir>]` (writes to `logs/`, git-ignored; `--list` shows scenarios)
-- `pnpm triage ask "<question>" --scenario=<n> [--style=structured|legacy] [--verbose] [--json]` (needs `ANTHROPIC_API_KEY` in `.env`; run `pnpm sim` first)
+- `pnpm triage ask "<question>" --scenario=<n> [--style=structured|legacy] [--verbose] [--json]` (needs `TRIAGE_ANTHROPIC_API_KEY` or `ANTHROPIC_API_KEY`; run `pnpm sim` first)
 - `pnpm evals`

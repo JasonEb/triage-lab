@@ -4,7 +4,7 @@
 
 ```bash
 pnpm sim --scenario=1                                   # generate logs (both styles)
-cp .env.example .env                                    # then set ANTHROPIC_API_KEY
+cp .env.example .env                                    # then set TRIAGE_ANTHROPIC_API_KEY
 pnpm triage ask "rx refills are failing since 2pm" --scenario=1 --verbose
 pnpm triage ask "rx refills are failing since 2pm" --scenario=1 --style=legacy --json
 ```
