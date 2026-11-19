@@ -73,6 +73,21 @@ importers:
         specifier: workspace:*
         version: link:../sim
 
+  packages/evals:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^1.10.0
+        version: 1.10.0(zod@4.6.7)
+      '@triage/agent':
+        specifier: workspace:*
+        version: link:../agent
+      '@triage/sim':
+        specifier: workspace:*
+        version: link:../sim
+      '@triage/store':
+        specifier: workspace:*
+        version: link:../store
+
   packages/logger:
     dependencies:
       zod:
