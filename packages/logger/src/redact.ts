@@ -53,6 +53,8 @@ export interface RedactOptions {
   extraMedications?: readonly string[];
   /** Known names to redact wherever they appear (e.g. synthetic patient roster). */
   names?: readonly string[];
+  /** Platform identifier formats to mask as [ID] wherever they appear (e.g. /pt_\d{5}/). */
+  idPatterns?: readonly RegExp[];
 }
 
 type Rule = [pattern: RegExp, replacement: string | ((...m: string[]) => string)];
@@ -90,6 +92,8 @@ const BASE_RULES: Rule[] = [
   [/(?<![\w/])\d{1,2}\/\d{1,2}\/\d{2,4}(?![\w/])/g, "[DATE]"],
   [new RegExp(`\\b(?:${MONTHS})\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}\\b`, "gi"), "[DATE]"],
   [/(?<![\w-])(?:\+?1[\s.-]?)?(?:\(\d{3}\)\s?|\d{3}[\s.-]?)\d{3}[\s.-]?\d{4}(?![\w-])/g, "[PHONE]"],
+  // Seven-digit local numbers (555-0142), optionally with a +1 prefix.
+  [/(?<![\w-])(?:\+?1[\s.-])?\d{3}-\d{4}(?![\w-])/g, "[PHONE]"],
   [/\b(?:Mr|Mrs|Ms|Mx|Miss|Dr)\.?\s+[A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+)?/g, "[NAME]"],
   [
     /\b([Pp]atient|[Mm]ember|[Cc]aregiver|[Gg]uardian|[Nn]ame)((?:\s+[Nn]ame)?\s*[:=]?\s+)([A-Z][a-z'-]+)((?:\s+[A-Z][a-z'-]+)?)/g,
@@ -100,11 +104,15 @@ const BASE_RULES: Rule[] = [
 const ruleCache = new Map<string, Rule[]>();
 
 function rulesFor(options: RedactOptions): Rule[] {
-  const key = JSON.stringify(options);
+  const key = JSON.stringify({ ...options, idPatterns: options.idPatterns?.map(String) });
   const cached = ruleCache.get(key);
   if (cached) return cached;
 
-  const rules = [...BASE_RULES];
+  const rules: Rule[] = (options.idPatterns ?? []).map((p) => [
+    new RegExp(p.source, p.flags.includes("g") ? p.flags : p.flags + "g"),
+    "[ID]",
+  ]);
+  rules.push(...BASE_RULES);
   if (options.names?.length) {
     rules.push([new RegExp(`\\b(?:${wordList(options.names)})\\b`, "gi"), "[NAME]"]);
   }

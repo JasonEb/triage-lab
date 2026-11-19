@@ -10,6 +10,8 @@ describe("redactText: removes PHI/PII", () => {
     ["Callback 555.123.4567 failed", "Callback [PHONE] failed"],
     ["Callback +1 555 123 4567 failed", "Callback [PHONE] failed"],
     ["SMS to 5551234567 queued", "SMS to [PHONE] queued"],
+    ["sms to +1-555-0142 accepted", "sms to [PHONE] accepted"],
+    ["call 555-0142 back", "call [PHONE] back"],
     ["SSN 123-45-6789 on file", "SSN [SSN] on file"],
     ["DOB 1985-03-14 mismatch", "DOB [DATE] mismatch"],
     ["dob: 03/14/1985", "dob: [DATE]"],
@@ -50,6 +52,12 @@ describe("redactText: removes PHI/PII", () => {
     );
   });
 
+  it("redacts configured identifier patterns", () => {
+    expect(redactText("form for pt_00042 and PT_00007 saved", { idPatterns: [/pt_\d{5}/i] })).toBe(
+      "form for [ID] and [ID] saved",
+    );
+  });
+
   it("can turn medication redaction off (e.g. for a non-clinical service)", () => {
     expect(redactText("Rx doxycycline shipped", { medications: false })).toBe(
       "Rx doxycycline shipped",
@@ -76,6 +84,8 @@ describe("redactText: keeps debugging signal", () => {
     "event rx.refill.failed emitted",
     "DynamoDB ProvisionedThroughputExceededException on table rx-orders",
     "port 5432 refused",
+    "build 2026-1118 shipped",
+    "id 6b57c454-08ee-4ea5-99e4-c8b76e57dd9b",
   ])("leaves %s unchanged", (input) => {
     expect(redactText(input)).toBe(input);
   });
