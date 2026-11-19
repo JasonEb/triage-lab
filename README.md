@@ -48,6 +48,17 @@ Five Lambda-style services (`intake`, `rx`, `scheduling`, `billing`, `notificati
 
 Each run is recorded once and rendered twice: **structured** (through `@triage/logger`, 100% compliant) and **legacy** (inconsistent per-service formats, no correlation IDs, 0% compliant). Both styles describe the identical incident, so log format is the only variable in the eval.
 
+## The troubleshooting agent
+
+Full description: [`docs/troubleshooting-agent.md`](docs/troubleshooting-agent.md).
+
+`pnpm triage ask "<question>" --scenario=<n>` loads one incident's logs into SQLite (FTS5, fingerprinted error clusters) and runs a read-only Claude tool loop with six tools: `search_logs`, `get_trace`, `error_clusters`, `timeline`, `recent_deploys` and `get_runbook`. It answers with a structured diagnosis that cites log line IDs.
+
+- **Read-only:** every tool is a SELECT.
+- **PHI-safe:** every tool result is redacted before it reaches the model, and a test checks that no synthetic patient data gets through.
+- **Bounded:** step and token budgets; running out gives `insufficient_data`, not a guess.
+- **Honest citations:** evidence the model never saw is dropped, and an answer without evidence is marked low confidence.
+
 ## Getting started
 
 Requires Node 20+ (see `.nvmrc`) and pnpm 10.
@@ -60,6 +71,6 @@ pnpm test        # Vitest
 pnpm triage lint-logs <file.jsonl>   # logging-standard compliance report
 pnpm sim --list                      # fault scenarios
 pnpm sim --scenario=3                # writes logs/scenario-3-.../{structured,legacy}/
+cp .env.example .env                 # set ANTHROPIC_API_KEY
+pnpm triage ask "Refills stopped going through around 14:00" --scenario=3 --verbose
 ```
-
-Copy `.env.example` to `.env` when the agent arrives in Phase 3.
