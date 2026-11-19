@@ -73,7 +73,7 @@ Answer shape:
 
 ## Why not Managed Agents?
 
-Anthropic's hosted agent runtime would remove the loop code, but here the tools query a local database, the redaction point and the budgets must be under our control, and the healthcare setting matters (Managed Agents is not currently eligible for HIPAA BAA coverage). A self-hosted loop is about 150 lines and is fully covered by tests.
+Anthropic's hosted agent runtime would remove the loop code, but here the tools query a local database, the redaction point and the budgets must be under our control, and the healthcare setting matters (Managed Agents is not currently eligible for HIPAA BAA coverage). The self-hosted loop is one file of about 300 lines, covered by tests that need no API key.
 
 ## Limits
 
