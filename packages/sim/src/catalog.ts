@@ -1,3 +1,4 @@
+import type { RedactOptions } from "@triage/logger";
 import { Rng } from "./rng.js";
 
 /**
@@ -80,3 +81,14 @@ export const MEDICATIONS: Medication[] = [
 
 export const PHARMACIES = ["pharmacy-a", "pharmacy-b"] as const;
 export type PharmacyId = (typeof PHARMACIES)[number];
+
+/**
+ * Redaction settings for anything derived from these logs that is shown to a
+ * model. Identifier formats and a name dictionary are platform configuration;
+ * here they describe the synthetic data. In production the dictionary would
+ * come from the patient directory.
+ */
+export const SYNTHETIC_REDACTION: RedactOptions = {
+  idPatterns: [/\bpt_\d{5}\b/],
+  names: [...SYNTHETIC_FIRST_NAMES, ...SYNTHETIC_LAST_NAMES],
+};

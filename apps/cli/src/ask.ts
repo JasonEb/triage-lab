@@ -2,6 +2,9 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  createClient,
+  DEFAULT_BASE_URL,
+  DEFAULT_MODEL,
   DEFAULTS,
   runAgent,
   type AgentEvent,
@@ -9,22 +12,13 @@ import {
   type Effort,
   type MessagesClient,
 } from "@triage/agent";
-import { redactText, type RedactOptions } from "@triage/logger";
-import { SYNTHETIC_FIRST_NAMES, SYNTHETIC_LAST_NAMES } from "@triage/sim";
+import { redactText } from "@triage/logger";
+import { SYNTHETIC_REDACTION } from "@triage/sim";
 import { LogStore, type Style } from "@triage/store";
 import type { IO } from "./cli.js";
 
-export const DEFAULT_MODEL = "claude-sonnet-5-5";
-
-/**
- * Redaction for anything shown to the model. Identifier formats and a name
- * dictionary are platform configuration; here they describe the synthetic
- * data. In production the dictionary would come from the patient directory.
- */
-export const AGENT_REDACTION: RedactOptions = {
-  idPatterns: [/\bpt_\d{5}\b/],
-  names: [...SYNTHETIC_FIRST_NAMES, ...SYNTHETIC_LAST_NAMES],
-};
+/** Redaction for anything shown to the model (see SYNTHETIC_REDACTION). */
+export const AGENT_REDACTION = SYNTHETIC_REDACTION;
 
 export const ASK_USAGE = `  triage ask "<question>" --scenario=<n> [--style=structured|legacy] [--logs=<dir>] [--json] [--verbose]
               [--max-steps=<n>] [--max-tokens=<n>] [--effort=low|medium|high|xhigh|max]
@@ -37,33 +31,7 @@ export interface AskDeps {
   cwd?: string;
 }
 
-export const DEFAULT_BASE_URL = "https://api.anthropic.com";
-
-/**
- * Build the Claude client from triage's own settings, not the SDK's ambient ones.
- * Hosted coding environments (e.g. Claude Code on the web) reserve ANTHROPIC_API_KEY
- * and set ANTHROPIC_BASE_URL / ANTHROPIC_AUTH_TOKEN for their own use; picking those
- * up would send the agent's traffic to the wrong endpoint or bill the wrong account.
- * So: TRIAGE_ANTHROPIC_API_KEY wins, ANTHROPIC_API_KEY is the local-.env fallback,
- * the base URL is explicit, and an ambient auth token is never sent.
- */
-export function createClient(
-  env: Record<string, string | undefined>,
-): { client: Anthropic } | { error: string } {
-  const apiKey = env.TRIAGE_ANTHROPIC_API_KEY || env.ANTHROPIC_API_KEY;
-  if (!apiKey)
-    return {
-      error:
-        "No API key. Set TRIAGE_ANTHROPIC_API_KEY (or ANTHROPIC_API_KEY) in a git-ignored .env (see .env.example) or export it.",
-    };
-  return {
-    client: new Anthropic({
-      apiKey,
-      authToken: null,
-      baseURL: env.TRIAGE_ANTHROPIC_BASE_URL || DEFAULT_BASE_URL,
-    }),
-  };
-}
+export { createClient, DEFAULT_BASE_URL, DEFAULT_MODEL };
 
 const flag = (args: string[], name: string) =>
   args.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
